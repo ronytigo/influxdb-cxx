@@ -29,6 +29,8 @@
 #include "InfluxDBException.h"
 
 #include <sstream>
+#include <iostream>
+#include <string>
 
 namespace influxdb::transports
 {
@@ -69,6 +71,7 @@ namespace influxdb::transports
 
         CURL* createWriteHandle(const std::string& url)
         {
+            std::cout << "creating writeHandle with url " << url << std::endl;
             if (CURL* writeHandle = curl_easy_init(); writeHandle != nullptr)
             {
                 setConnectionOptions(writeHandle);
