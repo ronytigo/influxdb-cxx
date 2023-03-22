@@ -114,7 +114,7 @@ namespace influxdb::transports
         }
         if (writeUrl.at(position - 1) != '/')
         {
-            writeUrl.insert(position, "/write");
+            writeUrl.insert(position, "/api/v2/write");
         }
         else
         {
@@ -161,18 +161,27 @@ namespace influxdb::transports
         curl_easy_setopt(readHandle, CURLOPT_USERPWD, auth.c_str());
     }
 
-    void HTTP::enableTokenAuth(const std::string &auth)
+    void HTTP::enableTokenAuth(const std::string& auth)
     {
-    struct curl_slist *headerList = NULL;
-    std::stringstream tokenString;
-    tokenString << "Authorization: Token " << auth;
-    headerList = curl_slist_append(headerList, tokenString.str().c_str());
-    curl_easy_setopt(readHandle, CURLOPT_HTTPHEADER, headerList);
-    curl_easy_setopt(writeHandle, CURLOPT_HTTPHEADER, headerList);
+        struct curl_slist* headerList = NULL;
+        std::stringstream tokenString;
+        tokenString << "Authorization: Token " << auth;
+        headerList = curl_slist_append(headerList, tokenString.str().c_str());
+        curl_easy_setopt(readHandle, CURLOPT_HTTPHEADER, headerList);
+        curl_easy_setopt(writeHandle, CURLOPT_HTTPHEADER, headerList);
     }
-    
+
+    int curlDebugCallback(CURL* curl, curl_infotype type, char* data, size_t size, void* userptr)
+    {
+        std::cout << "Debug info: " << std::string(data, size) << std::endl;
+        return 0;
+    }
+
     void HTTP::send(std::string&& lineprotocol)
     {
+        curl_easy_setopt(writeHandle, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
+        curl_easy_setopt(writeHandle, CURLOPT_VERBOSE, 1L);
+
         curl_easy_setopt(writeHandle, CURLOPT_POSTFIELDS, lineprotocol.c_str());
         curl_easy_setopt(writeHandle, CURLOPT_POSTFIELDSIZE, static_cast<long>(lineprotocol.length()));
         const CURLcode response = curl_easy_perform(writeHandle);
@@ -221,13 +230,24 @@ namespace influxdb::transports
 
     void HTTP::obtainDatabaseName(const std::string& url)
     {
-        const auto dbParameterPosition = url.find("db=");
-        mDatabaseName = url.substr(dbParameterPosition + 3);
+        const auto dbParameterPosition = url.find("bucket=");
+        mDatabaseName = url.substr(dbParameterPosition + 7);
+    }
+
+    void HTTP::obtainOrgName(const std::string& url)
+    {
+        const auto orgParameterPosition = url.find("org=");
+        mOrgName = url.substr(orgParameterPosition + 4);
     }
 
     std::string HTTP::databaseName() const
     {
         return mDatabaseName;
+    }
+
+    std::string HTTP::orgName() const
+    {
+        return mOrgName;
     }
 
     std::string HTTP::influxDbServiceUrl() const

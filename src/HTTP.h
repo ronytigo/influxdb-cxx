@@ -73,6 +73,9 @@ namespace influxdb::transports
         /// Get the database name managed by this transport
         [[nodiscard]] std::string databaseName() const;
 
+        /// Get the org name managed by this transport
+        [[nodiscard]] std::string orgName() const;
+
         /// Get the influx service url which transport connects to
         [[nodiscard]] std::string influxDbServiceUrl() const;
 
@@ -85,6 +88,9 @@ namespace influxdb::transports
 
         /// Obtain database name from the url passed
         void obtainDatabaseName(const std::string& url);
+
+        /// Obtain org name from the url passed
+        void obtainOrgName(const std::string& url);
 
         /// Initializes CURL for writing and common options
         /// \throw InfluxDBException	if database (?db=) not specified
@@ -110,6 +116,9 @@ namespace influxdb::transports
 
         /// Database name used
         std::string mDatabaseName;
+
+        /// Org name used
+        std::string mOrgName;
     };
 
 } // namespace influxdb
