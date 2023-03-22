@@ -179,8 +179,8 @@ namespace influxdb::transports
 
     void HTTP::send(std::string&& lineprotocol)
     {
-        curl_easy_setopt(writeHandle, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
-        curl_easy_setopt(writeHandle, CURLOPT_VERBOSE, 1L);
+      //  curl_easy_setopt(writeHandle, CURLOPT_DEBUGFUNCTION, curlDebugCallback);
+      //  curl_easy_setopt(writeHandle, CURLOPT_VERBOSE, 1L);
 
         curl_easy_setopt(writeHandle, CURLOPT_POSTFIELDS, lineprotocol.c_str());
         curl_easy_setopt(writeHandle, CURLOPT_POSTFIELDSIZE, static_cast<long>(lineprotocol.length()));
